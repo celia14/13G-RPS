@@ -14,8 +14,8 @@ PlayerId: string;
 RpsMatchState: {
     playerIds: PlayerId[];
     playerStateById: Record<PlayerId, RpsMatchPlayerState>;
-    throw: int; // ??
-    status: 'playing' | 'complete'; // ??
+    throwNumber: int;
+    status: 'playing' | 'complete';
 }
 
 RpsMatchPlayerState: {
@@ -72,16 +72,18 @@ From the client's point of view it's like: state A -> receive event containing E
 ### Events
 ```
 Event: {
+    matchId: MatchId;
     newState: RpsMatchState;
 }
 
 SelectCardEvent extends Event: {
     playerId: PlayerId;
-    selectedIndexInHand: int; // We already have the new state, this is to enable animation, so hand index seems easiest
+    selectedCard: Card;
 }
 
 ResolveThrowEvent extends Event: {
-    winnerId: PlayerId;
+    outcome: 'win' | 'draw';
+    winnerId?: PlayerId; // undefined if draw
     thrownCardByPlayerId: Record<PlayerId, Card>; // In case we need to recreate the throw animation
 }
 
@@ -101,8 +103,6 @@ Hand object has a HandController script. I don't think we need to distinguish be
 
 The MatchManager tells the hands what cards to render and when to select a card (which moves it out of hand to the play area.) I think that the MatchManager should just have a direct reference to the two hands.
 
-I'd put the Hand in charge of animating the card from the hand to the PlayArea, and then... letting the MatchManager know it's done, and the MatchManager informs the PlayArea?
-
 ### PlayArea
 Selected cards are moved face down into the PlayArea. When the throw is resolved, they're flipped face up (and some kind of amazing clash animation plays (out of scope)).
 
@@ -110,12 +110,15 @@ I think the MatchManager holds a direct reference to the PlayArea and tells it w
 
 ### Timing question
 
-Assuming we have animations, or even if not, the player needs time to process what happened:
-
-Player and opponent SelectCard events from the server should be able to be rendered in parallel, but both animations should be done before starting to animate the throw resolution.
+Assuming we have animations, or even if not, the player needs time to process what happened. Player and opponent SelectCard events from the server should be able to be rendered in parallel, but both animations should be done before starting to animate the throw resolution.
 
 From the MatchManager's point of view, it should process events immediately and know the final state of the model, but we need someone to be in charge of tracking the animation state and starting the throw resolution in the PlayArea.
 
 Maybe it's the PlayArea that knows when it's ready to resolve but waits for a signal that the cards are in place?
 
 One option is to get around this hackily by adding a delay on animating the resolve long enough to show a card is selected (since it must be precipitated by a player selecting a card, that delay is pretty fixed.)
+
+# Assumptions and changes
+
+### Opponent play timing
+It's boring to have the server synchronously respond to the player's throw with the opponent's throw, so I'm going to add a random timer each round for the simulated opponent to make a throw.
