@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum CardType
 {
@@ -7,7 +8,7 @@ public enum CardType
     Scissors
 }
 
-[RequireComponent(typeof(SpriteRenderer))]
+[RequireComponent(typeof(Image))]
 public class Card : MonoBehaviour
 {
     public CardType cardType;
@@ -18,7 +19,7 @@ public class Card : MonoBehaviour
     [SerializeField] private Sprite scissorsSprite;
     [SerializeField] private Sprite backSprite;
 
-    private SpriteRenderer spriteRenderer;
+    private Image image;
 
     public void Init(CardType type, bool faceUp)
     {
@@ -36,13 +37,13 @@ public class Card : MonoBehaviour
     // Awake is called during initialization, before Start
     private void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        image = GetComponent<Image>();
         SetSprite();
     }
 
     private void SetSprite()
     {
-        spriteRenderer.sprite = GetSprite();
+        image.sprite = GetSprite();
     }
 
     private Sprite GetSprite()
