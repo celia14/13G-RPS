@@ -11,15 +11,11 @@ namespace Server
     /// </summary>
     public class Match
     {
-        private const string botId = "00000000-0000-0000-0000-000000000000";
-
         private readonly string matchId;
-        private readonly string player1Id;
-        private readonly string player2Id;
 
         private MatchStatus status = MatchStatus.New;
         private int round = 0;
-        private readonly Dictionary<string, MatchPlayerState> playerStates;
+        private readonly Dictionary<string, MatchPlayerState> playerStates = new();
 
         public string MatchId => matchId;
 
@@ -29,10 +25,9 @@ namespace Server
             matchId = matchId,
             status = status,
             round = round,
-            playerStates = new[] {
-                ClonePlayerState(playerStates[player1Id]),
-                ClonePlayerState(playerStates[player2Id])
-            }
+
+            // Clone the player states and return in an array
+            playerStates = playerStates.Values.Select(ps => ClonePlayerState(ps)).ToArray()
         };
 
         /// <summary>
@@ -41,23 +36,51 @@ namespace Server
         /// </summary>
         public event Action<string> EventPublished;
 
-        public Match(string player1, string player2 = botId)
+        public Match()
         {
             matchId = Guid.NewGuid().ToString();
-            player1Id = player1;
-            player2Id = player2;
+        }
 
-            playerStates = new Dictionary<string, MatchPlayerState>
+        public void AddPlayer(string playerId, Action<string> playerEventCallback)
+        {
+            Debug.Log($"SERVER: Adding player {playerId} to match {matchId}");
+            
+            if (playerStates.Count >= 2)
             {
-                { player1Id, new MatchPlayerState { playerId = player1Id } },
-                { player2Id, new MatchPlayerState { playerId = player2Id } }
-            };
+                throw new InvalidOperationException("Match already has two players");
+            }
+            
+            // Add the player
+            playerStates.Add(playerId, new MatchPlayerState { playerId = playerId });
 
-            playerStates[player1Id].hand = GetStartingHand();
-            playerStates[player2Id].hand = GetStartingHand();
+            // Subscript the player to this match's events
+            EventPublished += playerEventCallback;
+        }
 
-            // Start immediately on load/creation for now
-            StartMatch();
+        public void StartMatch()
+        {
+            Debug.Log($"SERVER: Player count before starting match: {playerStates.Count}");
+            foreach (var playerId in playerStates.Keys)
+            {
+                Debug.Log($"SERVER: Player in match: {playerId}");
+            }
+
+            if (playerStates.Count < 2)
+            {
+                throw new ArgumentException("Two players must have joined");
+            }
+
+            Debug.Log($"SERVER: Starting match {matchId}");
+
+            // Init hands for both players
+            foreach (var playerId in playerStates.Keys)
+            {
+                playerStates[playerId].hand = GetStartingHand();
+            }
+
+            status = MatchStatus.Playing;
+
+            // TODO emit event to Start the opponent's turn
         }
 
         /// <summary>
@@ -75,13 +98,6 @@ namespace Server
                 default:
                     throw new ArgumentException($"Unknown command type: {command.commandType}");
             }
-        }
-
-        private void StartMatch()
-        {
-            Debug.Log($"SERVER: Starting match {matchId}");
-            status = MatchStatus.Playing;
-            // Start the opponent's turn
         }
 
         private CardDto[] GetStartingHand()

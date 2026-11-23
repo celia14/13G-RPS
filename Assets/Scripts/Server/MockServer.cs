@@ -21,19 +21,46 @@ namespace Server
         private readonly Dictionary<string, Match> matches = new();
 
         /// <summary>
-        /// Creates a new match and returns the initial state.
+        /// Creates a new match and returns the initial state. (TODO starting event instead)
         /// The client provides a callback to receive match events for their specific match.
+        /// This one is awkward and is making a lot of assumptions for a single player vs bot scenario.
         /// </summary>
-        public MatchState CreateMatch(Action<string> eventCallback)
+        public MatchState CreateMatch(string playerId, Action<string> playerEventCallback)
         {
             Debug.Log("SERVER: Creating new match");
-            var match = new Match("player1"); // TODO player's ID from login
+
+            // Immediately create a new match for the player vs a bot opponent.
+            // In the future there would be some kind of matchmaking rather than immediately creating a match.
+            Match match = new();
             matches[match.MatchId] = match;
 
-            // Subscribe the client's callback to this match in particular
-            match.EventPublished += eventCallback;
+            // Add the player
+            match.AddPlayer(playerId, playerEventCallback);
 
-            Debug.Log("SERVER: Created match with ID: " + match.MatchId);
+            // Create an opponent and have it subscribe itself
+            Opponent opponent = new();
+            opponent.AddToMatch(match.MatchId);
+
+            // Now that we have both players, start the match
+            Debug.Log("SERVER: Starting match " + match.MatchId);
+            match.StartMatch();
+            return match.State;
+        }
+
+        
+        /// <summary>
+        /// Subscribe to an existing match and get the initial state.
+        /// </summary>
+        public MatchState JoinMatch(string matchId, string playerId, Action<string> playerEventCallback)
+        {
+            Debug.Log("SERVER: Joining match with ID: " + matchId);
+            if (!matches.ContainsKey(matchId))
+            {
+                throw new ArgumentException("Match not found");
+            }
+
+            var match = matches[matchId];
+            match.AddPlayer(playerId, playerEventCallback);
             return match.State;
         }
 

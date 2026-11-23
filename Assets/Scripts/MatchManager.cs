@@ -2,10 +2,9 @@ using Contracts;
 using TMPro;
 using UnityEngine;
 
-[RequireComponent(typeof(MatchClient))]
 public class MatchManager : MonoBehaviour
 {
-    private const string playerId = "player1";
+    private const string playerId = "player1"; // TODO
 
     [SerializeField] private Hand playerHand;
     [SerializeField] private Hand opponentHand;
@@ -17,8 +16,8 @@ public class MatchManager : MonoBehaviour
 
     void Start()
     {
-        matchClient = GetComponent<MatchClient>();
-        MatchState matchState = matchClient.InitMatch();
+        matchClient = new MatchClient(playerId);
+        MatchState matchState = matchClient.CreateAndJoinMatch();
         matchClient.MatchEventReceived += HandleMatchEvent;
 
         foreach (var playerState in matchState.playerStates)

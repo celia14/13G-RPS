@@ -2,38 +2,54 @@ using System;
 using Contracts;
 using UnityEngine;
 
-public class MatchClient : MonoBehaviour
+public class MatchClient
 {
     private readonly Server.MockServer server = Server.MockServer.Instance;
 
+    private readonly string playerId;
     private string matchId;
 
     public event Action<MatchEvent, string> MatchEventReceived;
 
-    public MatchState InitMatch()
+    public MatchClient(string playerId)
     {
-        var matchState = server.CreateMatch(HandleMatchEvent);
+        this.playerId = playerId;
+    }
+
+    public MatchState CreateAndJoinMatch()
+    {
+        var matchState = server.CreateMatch(playerId, HandleMatchEvent);
+        matchId = matchState.matchId;
+        return matchState;
+    }
+
+    public MatchState JoinMatch(string matchId)
+    {
+        var matchState = server.JoinMatch(matchId, playerId, HandleMatchEvent);
         matchId = matchState.matchId;
         return matchState;
     }
 
     public void SelectCard(CardType cardType)
     {
-        SendPlayerCommand(new PlayerCommand<SelectCardCommandDetails>
-        {
-            playerId = "player1", // TODO
-            matchId = matchId,
-            commandType = "SelectCard",
-            details = new SelectCardCommandDetails
+        SendPlayerCommand("SelectCard",
+            new SelectCardCommandDetails
             {
                 selectedCard = new CardDto { cardType = cardType }
             }
-        });
+        );
     }
     
-    private void SendPlayerCommand(PlayerCommand command)
+    private void SendPlayerCommand<TDetails>(string commandType, TDetails details)
     {
-        Debug.Log($"CLIENT: Sending player {command.commandType} command");
+        Debug.Log($"CLIENT: Sending {commandType} command");
+        PlayerCommand<TDetails> command = new()
+        {
+            playerId = playerId,
+            matchId = matchId,
+            commandType = commandType,
+            details = details
+        };
         var commandJson = JsonUtility.ToJson(command);
         server.PlayerCommand(commandJson);
     }
