@@ -42,7 +42,7 @@ public class Hand : MonoBehaviour
 
     private void Start()
     {
-        PopulateHand();
+        //PopulateHand();
     }
 
     private void AddCard(CardType type)
