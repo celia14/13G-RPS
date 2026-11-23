@@ -8,6 +8,7 @@ public enum CardType
     Scissors
 }
 
+[RequireComponent(typeof(HandCardHandler))]
 public class Card : MonoBehaviour
 {
     public CardType cardType;
@@ -29,10 +30,15 @@ public class Card : MonoBehaviour
         ToggleInteraction(allowInteraction);
     }
 
-    public void Flip()
+    public void Flip(bool faceUp)
     {
-        isRevealed = !isRevealed;
+        isRevealed = faceUp;
         SetSprite();
+    }
+
+    public void ToggleInteraction(bool allowInteraction)
+    {
+        handCardHandler.enabled = allowInteraction;
     }
 
     private void Awake()
@@ -64,10 +70,5 @@ public class Card : MonoBehaviour
         }
 
         return null;
-    }
-
-    private void ToggleInteraction(bool allowInteraction)
-    {
-        handCardHandler.enabled = allowInteraction;
     }
 }

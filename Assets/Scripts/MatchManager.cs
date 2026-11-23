@@ -4,8 +4,8 @@ using UnityEngine;
 public class MatchManager : MonoBehaviour
 {
     [SerializeField] private Hand playerHand;
-    [SerializeField] private TMP_Text playerScoreText;
     [SerializeField] private Hand opponentHand;
+    [SerializeField] private TMP_Text playerScoreText;
     [SerializeField] private TMP_Text opponentScoreText;
     [SerializeField] private PlayArea playArea;
 
@@ -13,8 +13,16 @@ public class MatchManager : MonoBehaviour
     {
         playerHand.PopulateHand();
         opponentHand.PopulateHand();
+
         SetPlayerScore(0);
         SetOpponentScore(0);
+
+        playerHand.CardClicked += OnCardClicked;
+    }
+
+    private void OnCardClicked(Card card)
+    {
+        playArea.MoveCardToPlayerSlot(card);
     }
 
     private void SetPlayerScore(int score)

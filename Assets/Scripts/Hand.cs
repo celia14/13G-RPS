@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Hand : MonoBehaviour
 {
+    public event System.Action<Card> CardClicked;
+
     public bool isPlayer;
 
     [SerializeField] private Card cardPrefab;
@@ -49,5 +51,13 @@ public class Hand : MonoBehaviour
     {
         Card card = Instantiate(cardPrefab, handTransform);
         card.Init(type, isPlayer, isPlayer);
+
+        // Forward click events up
+        card.GetComponent<HandCardHandler>().Clicked += OnCardClicked;
+    }
+
+    private void OnCardClicked(Card card)
+    {
+        CardClicked?.Invoke(card);
     }
 }
