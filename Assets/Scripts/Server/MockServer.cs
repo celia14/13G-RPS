@@ -27,8 +27,6 @@ namespace Server
         /// </summary>
         public string CreateMatch(string playerId, Action<string> playerEventCallback)
         {
-            Debug.Log("SERVER: Creating new match");
-
             // Immediately create a new match for the player vs a bot opponent.
             // In the future there would be some kind of matchmaking rather than immediately creating a match.
             Match match = new();
@@ -42,7 +40,6 @@ namespace Server
             opponent.AddToMatch(match.MatchId);
 
             // Now that we have both players, start the match
-            Debug.Log("SERVER: Starting match " + match.MatchId);
             match.StartMatch();
             
             return match.MatchId;
@@ -54,7 +51,6 @@ namespace Server
         /// </summary>
         public void JoinMatch(string matchId, string playerId, Action<string> playerEventCallback)
         {
-            Debug.Log("SERVER: Joining match with ID: " + matchId);
             if (!matches.ContainsKey(matchId))
             {
                 throw new ArgumentException("Match not found");
@@ -69,7 +65,7 @@ namespace Server
         /// </summary>
         public void PlayerCommand(string commandJson)
         {
-            Debug.Log("SERVER: Processing player command: " + commandJson);
+            Debug.Log("SERVER: Received command " + commandJson);
 
             PlayerCommand command;
             try
@@ -81,8 +77,6 @@ namespace Server
                 Debug.LogError("SERVER: Failed to parse command JSON: " + ex.Message);
                 throw;
             }
-
-            Debug.Log("SERVER: Received command: " + command.commandType);
 
             if (string.IsNullOrEmpty(command?.matchId))
             {

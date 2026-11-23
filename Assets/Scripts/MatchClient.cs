@@ -39,7 +39,6 @@ public class MatchClient
     
     private void SendPlayerCommand<TDetails>(string commandType, TDetails details)
     {
-        Debug.Log($"CLIENT: Sending {commandType} command");
         PlayerCommand<TDetails> command = new()
         {
             playerId = playerId,
@@ -48,19 +47,20 @@ public class MatchClient
             details = details
         };
         var commandJson = JsonUtility.ToJson(command);
+        Debug.Log($"{playerId.ToUpper()} CLIENT: Sending command {commandJson}");
         server.PlayerCommand(commandJson);
     }
 
     private void HandleMatchEvent(string matchEventJson)
     {
         try {
-            Debug.Log($"CLIENT: Received match event JSON: {matchEventJson}");
+            Debug.Log($"{playerId.ToUpper()} CLIENT: Received event {matchEventJson}");
             var matchEvent = JsonUtility.FromJson<MatchEvent>(matchEventJson);
             MatchEventReceived?.Invoke(matchEvent, matchEventJson);
         }
         catch (Exception ex)
         {
-            Debug.LogError($"CLIENT: Failed to handle match event: {ex.Message}");
+            Debug.LogError($"{playerId.ToUpper()} CLIENT: Failed to handle match event: {ex.Message}");
             throw;
         }
     }

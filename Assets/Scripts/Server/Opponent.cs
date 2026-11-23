@@ -10,7 +10,8 @@ namespace Server
     /// </summary>
     public class Opponent
     {
-        public const string playerId = "00000000-0000-0000-0000-000000000000";
+        // In real life this should be a guid
+        public const string playerId = "bot";
 
         private MatchClient matchClient;
 

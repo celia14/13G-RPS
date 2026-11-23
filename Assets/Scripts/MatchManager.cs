@@ -71,7 +71,6 @@ public class MatchManager : MonoBehaviour
 
     private void OnCardSelected(MatchEvent<SelectCardEventDetails> matchEvent)
     {
-        Debug.Log($"Player {matchEvent.details.playerId} selected card {matchEvent.details.selectedCard.cardType}");
         if (matchEvent.details.playerId == playerId)
         {
             var card = playerHand.GetCard(matchEvent.details.selectedCard.cardType);

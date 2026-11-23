@@ -43,8 +43,6 @@ namespace Server
 
         public void AddPlayer(string playerId, Action<string> playerEventCallback)
         {
-            Debug.Log($"SERVER: Adding player {playerId} to match {matchId}");
-
             if (playerStates.Count >= 2)
             {
                 throw new InvalidOperationException("Match already has two players");
@@ -63,18 +61,10 @@ namespace Server
 
         public void StartMatch()
         {
-            Debug.Log($"SERVER: Player count before starting match: {playerStates.Count}");
-            foreach (var playerId in playerStates.Keys)
-            {
-                Debug.Log($"SERVER: Player in match: {playerId}");
-            }
-
             if (playerStates.Count < 2)
             {
                 throw new ArgumentException("Two players must have joined");
             }
-
-            Debug.Log($"SERVER: Starting match {matchId}");
 
             // Init hands for both players
             foreach (var playerId in playerStates.Keys)
@@ -92,7 +82,6 @@ namespace Server
         /// </summary>
         public void ProcessCommand(PlayerCommand command, string commandJson)
         {
-            Debug.Log($"SERVER: Processing command {command.commandType} from player {command.playerId}");
             switch (command.commandType)
             {
                 case "SelectCard":
@@ -128,8 +117,6 @@ namespace Server
 
         private void SelectCard(string playerId, CardDto selectedCard)
         {
-            Debug.Log($"SERVER: Player {playerId} selected {selectedCard.cardType}");
-
             if (selectedCard == null)
             {
                 throw new ArgumentException("Selected card cannot be null");
@@ -172,6 +159,7 @@ namespace Server
                 newMatchState = State
             };
             var eventJson = JsonUtility.ToJson(matchEvent);
+            Debug.Log($"SERVER: Sending event {eventJson}");
             EventPublished?.Invoke(eventJson);
         }
 
