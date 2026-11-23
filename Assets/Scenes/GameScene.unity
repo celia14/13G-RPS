@@ -358,6 +358,7 @@ GameObject:
   m_Component:
   - component: {fileID: 596738021}
   - component: {fileID: 596738020}
+  - component: {fileID: 596738022}
   m_Layer: 0
   m_Name: Card
   m_TagString: Untagged
@@ -414,7 +415,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 6689946350199266671, guid: c2c72ceb6fdc4e243a5210b3d7020451, type: 3}
+  m_Sprite: {fileID: -8622259438476403829, guid: 041c3e3f0c07f0a468739e3994377f50, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -440,6 +441,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &596738022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 596738019}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b7f7889dab36674fa2634919cf31a32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardType: 0
+  isFaceUp: 1
+  rockSprite: {fileID: 3452003437791708593, guid: e2aeb8cf5a8c803449387ed39d5e7f98, type: 3}
+  paperSprite: {fileID: 2045492094208909694, guid: 1222b880ae3f2d1428ba74ea5ebd520c, type: 3}
+  scissorsSprite: {fileID: 6689946350199266671, guid: c2c72ceb6fdc4e243a5210b3d7020451, type: 3}
+  backSprite: {fileID: -8622259438476403829, guid: 041c3e3f0c07f0a468739e3994377f50, type: 3}
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
