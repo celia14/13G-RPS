@@ -29,13 +29,26 @@ public class Hand : MonoBehaviour
         }
     }
 
-
     public void ClearHand()
     {
         foreach (Transform child in handTransform)
         {
             Destroy(child.gameObject);
         }
+    }
+
+    // Find a card by type. This assumes that there is only one card of each type in the hand.
+    public Card GetCard(CardType type)
+    {
+        foreach (Transform child in handTransform)
+        {
+            Card card = child.GetComponent<Card>();
+            if (card != null && card.cardType == type)
+            {
+                return card;
+            }
+        }
+        return null;
     }
 
     private void Awake()

@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(MatchClient))]
 public class MatchManager : MonoBehaviour
 {
+    private const string playerId = "player1";
+
     [SerializeField] private Hand playerHand;
     [SerializeField] private Hand opponentHand;
     [SerializeField] private TMP_Text playerScoreText;
@@ -17,6 +19,7 @@ public class MatchManager : MonoBehaviour
     {
         matchClient = GetComponent<MatchClient>();
         MatchState matchState = matchClient.InitMatch();
+        matchClient.MatchEventReceived += HandleMatchEvent;
 
         // TODO populate based on state
         playerHand.PopulateHand();
@@ -28,13 +31,42 @@ public class MatchManager : MonoBehaviour
         playerHand.CardClicked += OnCardClicked;
     }
 
+    private void HandleMatchEvent(MatchEvent matchEvent, string matchEventJson)
+    {
+        switch (matchEvent.eventType)
+        {
+            case "CardSelected":
+                var cardSelectedEvent = JsonUtility.FromJson<MatchEvent<SelectCardEventDetails>>(matchEventJson);
+                OnCardSelected(cardSelectedEvent);
+                break;
+            case "RoundResult":
+                // Handle round result event
+                break;
+            default:
+                Debug.LogError("Unknown match event type: " + matchEvent.eventType);
+                break;
+        }
+    }
+
     private void OnCardClicked(Card card)
     {
-        // TODO Show a "selecting" state?
-
         matchClient.SelectCard(card.cardType);
+    }
 
-        //playArea.MoveCardToPlayerSlot(card);
+    private void OnCardSelected(MatchEvent<SelectCardEventDetails> matchEvent)
+    {
+        Debug.Log($"Player {matchEvent.details.playerId} selected card {matchEvent.details.selectedCard.cardType}");
+        if (matchEvent.details.playerId == playerId)
+        {
+            var card = playerHand.GetCard(matchEvent.details.selectedCard.cardType);
+            playArea.MoveCardToPlayerSlot(card);
+        }
+        else
+        {
+            var card = opponentHand.GetCard(matchEvent.details.selectedCard.cardType);
+            playArea.MoveCardToOpponentSlot(card);
+        }
+    
     }
 
     private void SetPlayerScore(int score)

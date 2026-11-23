@@ -21,17 +21,20 @@ namespace Server
         private readonly Dictionary<string, Match> matches = new();
 
         /// <summary>
-        /// Creates a new match and returns the match itself (so the client can subscribe to match events.)
-        /// In real life there should be some other subscription mechanism.
+        /// Creates a new match and returns the initial state.
+        /// The client provides a callback to receive match events for their specific match.
         /// </summary>
-        public Match CreateMatch()
+        public MatchState CreateMatch(Action<string> eventCallback)
         {
             Debug.Log("SERVER: Creating new match");
             var match = new Match("player1"); // TODO player's ID from login
             matches[match.MatchId] = match;
 
+            // Subscribe the client's callback to this match in particular
+            match.EventPublished += eventCallback;
+
             Debug.Log("SERVER: Created match with ID: " + match.MatchId);
-            return match;
+            return match.State;
         }
 
         /// <summary>
@@ -56,18 +59,16 @@ namespace Server
 
             if (string.IsNullOrEmpty(command?.matchId))
             {
-                Debug.LogError("SERVER: Missing MatchId");
                 throw new ArgumentException("Missing MatchId");
             }
 
             if (!matches.ContainsKey(command.matchId))
             {
-                Debug.LogError("SERVER: Match not found: " + command.matchId);
                 throw new ArgumentException("Match not found");
             }
 
             // Give the command to the match
-            matches[command.matchId].ProcessCommand(command);
+            matches[command.matchId].ProcessCommand(command, commandJson);
         }
     }
 

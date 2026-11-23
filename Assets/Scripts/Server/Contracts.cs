@@ -50,15 +50,23 @@ namespace Contracts
     [Serializable]
     public class PlayerCommand
     {
+        /// <summary>
+        /// Must be a const from PlayerCommandTypes
+        /// </summary>
+        public string commandType;
         public MatchId matchId;
         public PlayerId playerId;
-        public string commandType;
     }
 
     [Serializable]
     public class PlayerCommand<TDetails> : PlayerCommand
     {
         public TDetails details;
+    }
+
+    public static class PlayerCommandTypes
+    {
+        public const string SelectCard = "SelectCard";
     }
 
     [Serializable]
@@ -73,8 +81,11 @@ namespace Contracts
     [Serializable]
     public class MatchEvent
     {
-        public MatchId matchId;
+        /// <summary>
+        /// Must be a const from MatchEventTypes
+        /// </summary>
         public string eventType;
+        public MatchId matchId;
         public MatchState newMatchState;
     }
 
@@ -82,6 +93,12 @@ namespace Contracts
     public class MatchEvent<TDetails> : MatchEvent
     {
         public TDetails details;
+    }
+
+    public static class MatchEventTypes
+    {
+        public const string SelectCard = "SelectCard";
+        public const string ResolveRound = "ResolveRound";
     }
 
     [Serializable]
