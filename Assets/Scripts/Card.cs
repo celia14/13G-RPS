@@ -1,12 +1,6 @@
+using Contracts;
 using UnityEngine;
 using UnityEngine.UI;
-
-public enum CardType
-{
-    Rock,
-    Paper,
-    Scissors
-}
 
 // The player can interact with the card differently depending on its
 // current situation, so we need to track that. Behavior is enabled and

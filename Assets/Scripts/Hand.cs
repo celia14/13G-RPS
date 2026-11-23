@@ -1,3 +1,4 @@
+using Contracts;
 using UnityEngine;
 
 public class Hand : MonoBehaviour
