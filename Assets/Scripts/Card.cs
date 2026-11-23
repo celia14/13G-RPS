@@ -7,8 +7,9 @@ public enum CardType
     Paper,
     Scissors
 }
-
 [RequireComponent(typeof(HandCardHandler))]
+
+[RequireComponent(typeof(PlayedCardHandler))]
 public class Card : MonoBehaviour
 {
     public CardType cardType;
@@ -19,15 +20,18 @@ public class Card : MonoBehaviour
     [SerializeField] private Sprite paperSprite;
     [SerializeField] private Sprite scissorsSprite;
     [SerializeField] private Sprite backSprite;
+
+    // Getter for image - useful for handler scripts
+    public Image Image => image;
     
     private HandCardHandler handCardHandler;
+    private PlayedCardHandler playedCardHandler;
 
-    public void Init(CardType type, bool faceUp, bool allowInteraction)
+    public void Init(CardType type, bool faceUp)
     {
         cardType = type;
         isRevealed = faceUp;
         SetSprite();
-        ToggleInteraction(allowInteraction);
     }
 
     public void Flip(bool faceUp)
@@ -36,14 +40,20 @@ public class Card : MonoBehaviour
         SetSprite();
     }
 
-    public void ToggleInteraction(bool allowInteraction)
+    public void ToggleHandInteractions(bool allowHandInteractions)
     {
-        handCardHandler.enabled = allowInteraction;
+        handCardHandler.enabled = allowHandInteractions;
+    }
+
+    public void TogglePlayedInteractions(bool allowPlayedInteractions)
+    {
+        playedCardHandler.enabled = allowPlayedInteractions;
     }
 
     private void Awake()
     {
         handCardHandler = GetComponent<HandCardHandler>();
+        playedCardHandler = GetComponent<PlayedCardHandler>();
         SetSprite();
     }
 

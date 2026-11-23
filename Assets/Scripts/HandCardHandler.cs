@@ -9,17 +9,17 @@ public class HandCardHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
 {
     public event System.Action<Card> Clicked;
 
-    [SerializeField] private Transform cardImage;
     [SerializeField] private float hoverOffset = 20f;
 
     private Card card;
+    private Transform cardImageTransform;
 
     private Vector3 imagePosition;
 
     private void Awake()
     {
         card = GetComponent<Card>();
-        imagePosition = cardImage.localPosition;
+        cardImageTransform = card.Image.transform;
     }
 
     // Click
@@ -34,17 +34,22 @@ public class HandCardHandler : MonoBehaviour, IPointerClickHandler, IPointerEnte
     // Hover
     public void OnPointerEnter(PointerEventData eventData)
     {
-        cardImage.transform.localPosition = imagePosition + new Vector3(0, hoverOffset, 0);
+        cardImageTransform.transform.localPosition = imagePosition + new Vector3(0, hoverOffset, 0);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        cardImage.transform.localPosition = imagePosition;
+        cardImageTransform.transform.localPosition = imagePosition;
+    }
+
+    public void OnEnable()
+    {
+        imagePosition = cardImageTransform.transform.localPosition;
     }
 
     public void OnDisable()
     {
         // Make sure to reset when interactions are disabled
-        cardImage.transform.localPosition = imagePosition;
+        cardImageTransform.transform.localPosition = imagePosition;
     }
 }

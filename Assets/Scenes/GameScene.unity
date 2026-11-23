@@ -1058,8 +1058,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MatchManager
   playerHand: {fileID: 245429072}
-  playerScoreText: {fileID: 136448393}
   opponentHand: {fileID: 278307560}
+  playerScoreText: {fileID: 136448393}
   opponentScoreText: {fileID: 440999694}
   playArea: {fileID: 1634143480}
 --- !u!1 &1142891974

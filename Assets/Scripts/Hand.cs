@@ -50,7 +50,8 @@ public class Hand : MonoBehaviour
     private void AddCard(CardType type)
     {
         Card card = Instantiate(cardPrefab, handTransform);
-        card.Init(type, isPlayer, isPlayer);
+        card.Init(type, isPlayer);
+        card.ToggleHandInteractions(isPlayer);
 
         // Forward click events up
         card.GetComponent<HandCardHandler>().Clicked += OnCardClicked;
