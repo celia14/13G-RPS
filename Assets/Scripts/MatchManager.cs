@@ -1,6 +1,8 @@
+using Contracts;
 using TMPro;
 using UnityEngine;
 
+[RequireComponent(typeof(MatchClient))]
 public class MatchManager : MonoBehaviour
 {
     [SerializeField] private Hand playerHand;
@@ -9,8 +11,14 @@ public class MatchManager : MonoBehaviour
     [SerializeField] private TMP_Text opponentScoreText;
     [SerializeField] private PlayArea playArea;
 
+    private MatchClient matchClient;
+
     void Start()
     {
+        matchClient = GetComponent<MatchClient>();
+        MatchState matchState = matchClient.InitMatch();
+
+        // TODO populate based on state
         playerHand.PopulateHand();
         opponentHand.PopulateHand();
 
@@ -22,7 +30,11 @@ public class MatchManager : MonoBehaviour
 
     private void OnCardClicked(Card card)
     {
-        playArea.MoveCardToPlayerSlot(card);
+        // TODO Show a "selecting" state?
+
+        matchClient.SelectCard(card.cardType);
+
+        //playArea.MoveCardToPlayerSlot(card);
     }
 
     private void SetPlayerScore(int score)

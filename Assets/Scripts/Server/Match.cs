@@ -14,8 +14,10 @@ namespace Server
         private readonly string matchId;
         private readonly string player1Id;
         private readonly string player2Id;
+        private readonly MatchState state = new MatchState();
 
         public string MatchId => matchId;
+        public MatchState State => state;
 
         /// <summary>
         /// Publishes match events. The player's client
@@ -50,7 +52,7 @@ namespace Server
 
         private void SelectCard(string playerId, CardDto selectedCard)
         {
-            Debug.Log($"Player {playerId} selected {selectedCard.cardType}");
+            Debug.Log($"SERVER: Player {playerId} selected {selectedCard.cardType}");
         }
     }
 
