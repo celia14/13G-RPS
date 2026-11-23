@@ -24,8 +24,7 @@ public class PlayArea : MonoBehaviour
         }
 
         card.Flip(false);
-        card.ToggleHandInteractions(false);
-        card.TogglePlayedInteractions(true);
+        card.SetInteractionMode(CardInteractionMode.Played);
         card.transform.SetParent(slot, false);
         card.transform.localPosition = Vector3.zero;
     }

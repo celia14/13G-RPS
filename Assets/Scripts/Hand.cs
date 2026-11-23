@@ -51,7 +51,7 @@ public class Hand : MonoBehaviour
     {
         Card card = Instantiate(cardPrefab, handTransform);
         card.Init(type, isPlayer);
-        card.ToggleHandInteractions(isPlayer);
+        card.SetInteractionMode(isPlayer ? CardInteractionMode.Hand : CardInteractionMode.None);
 
         // Forward click events up
         card.GetComponent<HandCardHandler>().Clicked += OnCardClicked;

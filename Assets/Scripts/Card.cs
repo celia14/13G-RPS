@@ -7,6 +7,17 @@ public enum CardType
     Paper,
     Scissors
 }
+
+// The player can interact with the card differently depending on its
+// current situation, so we need to track that. Behavior is enabled and
+// disabled by toggling Handler scripts.
+public enum CardInteractionMode
+{
+    None,
+    Hand,
+    Played
+}
+
 [RequireComponent(typeof(HandCardHandler))]
 
 [RequireComponent(typeof(PlayedCardHandler))]
@@ -24,6 +35,7 @@ public class Card : MonoBehaviour
     // Getter for image - useful for handler scripts
     public Image Image => image;
     
+    private CardInteractionMode interactionMode;
     private HandCardHandler handCardHandler;
     private PlayedCardHandler playedCardHandler;
 
@@ -40,14 +52,11 @@ public class Card : MonoBehaviour
         SetSprite();
     }
 
-    public void ToggleHandInteractions(bool allowHandInteractions)
+    public void SetInteractionMode(CardInteractionMode mode)
     {
-        handCardHandler.enabled = allowHandInteractions;
-    }
-
-    public void TogglePlayedInteractions(bool allowPlayedInteractions)
-    {
-        playedCardHandler.enabled = allowPlayedInteractions;
+        interactionMode = mode;
+        handCardHandler.enabled = mode == CardInteractionMode.Hand;
+        playedCardHandler.enabled = mode == CardInteractionMode.Played;
     }
 
     private void Awake()
