@@ -21,11 +21,11 @@ namespace Server
         private readonly Dictionary<string, Match> matches = new();
 
         /// <summary>
-        /// Creates a new match and returns the initial state. (TODO starting event instead)
+        /// Creates a new match and adds the player to it.
         /// The client provides a callback to receive match events for their specific match.
         /// This one is awkward and is making a lot of assumptions for a single player vs bot scenario.
         /// </summary>
-        public MatchState CreateMatch(string playerId, Action<string> playerEventCallback)
+        public string CreateMatch(string playerId, Action<string> playerEventCallback)
         {
             Debug.Log("SERVER: Creating new match");
 
@@ -44,14 +44,15 @@ namespace Server
             // Now that we have both players, start the match
             Debug.Log("SERVER: Starting match " + match.MatchId);
             match.StartMatch();
-            return match.State;
+            
+            return match.MatchId;
         }
 
         
         /// <summary>
-        /// Subscribe to an existing match and get the initial state.
+        /// Subscribe to an existing match with this player.
         /// </summary>
-        public MatchState JoinMatch(string matchId, string playerId, Action<string> playerEventCallback)
+        public void JoinMatch(string matchId, string playerId, Action<string> playerEventCallback)
         {
             Debug.Log("SERVER: Joining match with ID: " + matchId);
             if (!matches.ContainsKey(matchId))
@@ -61,7 +62,6 @@ namespace Server
 
             var match = matches[matchId];
             match.AddPlayer(playerId, playerEventCallback);
-            return match.State;
         }
 
         /// <summary>

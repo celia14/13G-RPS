@@ -1,4 +1,3 @@
-using System;
 using Contracts;
 
 namespace Server
@@ -26,8 +25,7 @@ namespace Server
 
         public void AddToMatch(string matchId)
         {
-            MatchState matchState = matchClient.JoinMatch(matchId);
-            UpdateHand(matchState);
+            matchClient.JoinMatch(matchId);
         }
 
         private void HandleMatchEvent(MatchEvent matchEvent, string matchEventJson)

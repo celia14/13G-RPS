@@ -16,18 +16,15 @@ public class MatchClient
         this.playerId = playerId;
     }
 
-    public MatchState CreateAndJoinMatch()
+    public void CreateAndJoinMatch()
     {
-        var matchState = server.CreateMatch(playerId, HandleMatchEvent);
-        matchId = matchState.matchId;
-        return matchState;
+        matchId = server.CreateMatch(playerId, HandleMatchEvent);
     }
 
-    public MatchState JoinMatch(string matchId)
+    public void JoinMatch(string matchId)
     {
-        var matchState = server.JoinMatch(matchId, playerId, HandleMatchEvent);
-        this.matchId = matchState.matchId;
-        return matchState;
+        server.JoinMatch(matchId, playerId, HandleMatchEvent);
+        this.matchId = matchId;
     }
 
     public void SelectCard(CardType cardType)

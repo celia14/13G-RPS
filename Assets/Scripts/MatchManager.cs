@@ -17,13 +17,8 @@ public class MatchManager : MonoBehaviour
     void Start()
     {
         matchClient = new MatchClient(playerId);
-        MatchState matchState = matchClient.CreateAndJoinMatch();
         matchClient.MatchEventReceived += HandleMatchEvent;
-
-        foreach (var playerState in matchState.playerStates)
-        {
-            UpdatePlayerState(playerState);
-        }
+        matchClient.CreateAndJoinMatch();
 
         playerHand.CardClicked += OnCardClicked;
     }
@@ -33,7 +28,7 @@ public class MatchManager : MonoBehaviour
         switch (matchEvent.eventType)
         {
             case MatchEventTypes.MatchStarted:
-                Debug.Log("Match started");
+                UpdateMatchState(matchEvent.newMatchState);
                 break;
             case MatchEventTypes.CardSelected:
                 var cardSelectedEvent = JsonUtility.FromJson<MatchEvent<SelectCardEventDetails>>(matchEventJson);
@@ -44,6 +39,14 @@ public class MatchManager : MonoBehaviour
                 break;
             default:
                 break;
+        }
+    }
+
+    private void UpdateMatchState(MatchState matchState)
+    {
+        foreach (var playerState in matchState.playerStates)
+        {
+            UpdatePlayerState(playerState);
         }
     }
 

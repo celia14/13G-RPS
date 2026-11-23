@@ -49,6 +49,10 @@ namespace Server
             {
                 throw new InvalidOperationException("Match already has two players");
             }
+            if (status != MatchStatus.New)
+            {
+                throw new InvalidOperationException("Match has already started");
+            }
             
             // Add the player
             playerStates.Add(playerId, new MatchPlayerState { playerId = playerId });

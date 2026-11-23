@@ -7,7 +7,7 @@ public class PlayArea : MonoBehaviour
 
     public void MoveCardToPlayerSlot(Card card)
     {
-        MoveCardToSlot(card, playerSlot);
+        MoveCardToSlot(card, playerSlot, true);
     }
 
     public void MoveCardToOpponentSlot(Card card)
@@ -15,7 +15,7 @@ public class PlayArea : MonoBehaviour
         MoveCardToSlot(card, opponentSlot);
     }
 
-    private void MoveCardToSlot(Card card, Transform slot)
+    private void MoveCardToSlot(Card card, Transform slot, bool allowInteraction = false)
     {
         if (slot.childCount > 0)
         {
@@ -24,7 +24,7 @@ public class PlayArea : MonoBehaviour
         }
 
         card.Flip(false);
-        card.SetInteractionMode(CardInteractionMode.Played);
+        card.SetInteractionMode(allowInteraction ? CardInteractionMode.Played : CardInteractionMode.None);
         card.transform.SetParent(slot, false);
         card.transform.localPosition = Vector3.zero;
     }
