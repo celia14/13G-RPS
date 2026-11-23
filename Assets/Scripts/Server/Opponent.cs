@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Contracts;
 
 namespace Server
@@ -10,8 +11,10 @@ namespace Server
     /// </summary>
     public class Opponent
     {
-        // In real life this should be a guid
+        // In real life the id should be a guid
         public const string playerId = "bot";
+        private const int minThinkingDelayMs = 500;
+        private const int maxThinkingDelayMs = 1500;
 
         private MatchClient matchClient;
 
@@ -29,7 +32,7 @@ namespace Server
             matchClient.JoinMatch(matchId);
         }
 
-        private void HandleMatchEvent(MatchEvent matchEvent, string matchEventJson)
+        private async void HandleMatchEvent(MatchEvent matchEvent, string matchEventJson)
         {
             // Always up the bot's hand with the latest.
             UpdateHand(matchEvent.newMatchState);
@@ -38,7 +41,7 @@ namespace Server
             {
                 case MatchEventTypes.MatchStarted:
                     // Start playing!
-                    PlayRound();
+                    await PlayRoundAsync();
                     break;
                 case MatchEventTypes.RoundResolved:
                     // Handle round result event
@@ -48,9 +51,11 @@ namespace Server
             }
         }
 
-        private void PlayRound()
+        private async Task PlayRoundAsync()
         {
-            // TODO Timer for realism
+            // Wait before playing, like a real opponent would
+            int delay = UnityEngine.Random.Range(minThinkingDelayMs, maxThinkingDelayMs);
+            await Task.Delay(delay);
 
             CardDto chosenCard = ChooseCard();
             matchClient.SelectCard(chosenCard.cardType);
