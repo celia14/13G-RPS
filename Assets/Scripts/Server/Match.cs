@@ -44,7 +44,7 @@ namespace Server
         public void AddPlayer(string playerId, Action<string> playerEventCallback)
         {
             Debug.Log($"SERVER: Adding player {playerId} to match {matchId}");
-            
+
             if (playerStates.Count >= 2)
             {
                 throw new InvalidOperationException("Match already has two players");
@@ -80,7 +80,7 @@ namespace Server
 
             status = MatchStatus.Playing;
 
-            // TODO emit event to Start the opponent's turn
+            EmitMatchEvent(MatchEventTypes.MatchStarted, new { });
         }
 
         /// <summary>
@@ -146,27 +146,29 @@ namespace Server
             playerStates[playerId].hand = playerStates[playerId].hand?.Where(c => !AreCardsEqual(c, selectedCard)).ToArray();
 
             // Broadcast the selection
-            EventPublished?.Invoke(BuildMatchEvent(
-                MatchEventTypes.SelectCard,
+            EmitMatchEvent(
+                MatchEventTypes.CardSelected,
                 new SelectCardEventDetails
                 {
                     playerId = playerId,
                     selectedCard = selectedCard
                 }
-            ));
+            );
         }
 
         // Utils
 
-        private string BuildMatchEvent<TDetails>(string eventType, TDetails details)
+        private void EmitMatchEvent<TDetails>(string eventType, TDetails details)
         {
             var matchEvent = new MatchEvent<TDetails>
             {
                 matchId = matchId,
                 eventType = eventType,
-                details = details
+                details = details,
+                newMatchState = State
             };
-            return JsonUtility.ToJson(matchEvent);
+            var eventJson = JsonUtility.ToJson(matchEvent);
+            EventPublished?.Invoke(eventJson);
         }
 
         private static MatchPlayerState ClonePlayerState(MatchPlayerState state)

@@ -21,6 +21,7 @@ namespace Server
         public Opponent()
         {
             matchClient = new MatchClient(playerId);
+            matchClient.MatchEventReceived += HandleMatchEvent;
         }
 
         public void AddToMatch(string matchId)
@@ -29,20 +30,31 @@ namespace Server
             UpdateHand(matchState);
         }
 
-        public void PlayRound()
+        private void HandleMatchEvent(MatchEvent matchEvent, string matchEventJson)
+        {
+            // Always up the bot's hand with the latest.
+            UpdateHand(matchEvent.newMatchState);
+
+            switch (matchEvent.eventType)
+            {
+                case MatchEventTypes.MatchStarted:
+                    // Start playing!
+                    PlayRound();
+                    break;
+                case MatchEventTypes.RoundResolved:
+                    // Handle round result event
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void PlayRound()
         {
             // TODO Timer for realism
 
             CardDto chosenCard = ChooseCard();
             matchClient.SelectCard(chosenCard.cardType);
-        }
-
-        private void HandleMatchEvent(MatchEvent matchEvent, string matchEventJson)
-        {
-            // The bot doesn't care what's actually going on, it just wants the latest state
-            // Arguably, getting it from events instead of just checking the Match is
-            // unnecessary indirection, but I like the bot acting like a real client.
-            UpdateHand(matchEvent.newMatchState);
         }
 
         private void UpdateHand(MatchState matchState)

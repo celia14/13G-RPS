@@ -26,7 +26,7 @@ public class MatchClient
     public MatchState JoinMatch(string matchId)
     {
         var matchState = server.JoinMatch(matchId, playerId, HandleMatchEvent);
-        matchId = matchState.matchId;
+        this.matchId = matchState.matchId;
         return matchState;
     }
 

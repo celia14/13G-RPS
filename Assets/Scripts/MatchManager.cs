@@ -32,15 +32,17 @@ public class MatchManager : MonoBehaviour
     {
         switch (matchEvent.eventType)
         {
-            case MatchEventTypes.SelectCard:
+            case MatchEventTypes.MatchStarted:
+                Debug.Log("Match started");
+                break;
+            case MatchEventTypes.CardSelected:
                 var cardSelectedEvent = JsonUtility.FromJson<MatchEvent<SelectCardEventDetails>>(matchEventJson);
                 OnCardSelected(cardSelectedEvent);
                 break;
-            case MatchEventTypes.ResolveRound:
+            case MatchEventTypes.RoundResolved:
                 // Handle round result event
                 break;
             default:
-                Debug.LogError("Unknown match event type: " + matchEvent.eventType);
                 break;
         }
     }

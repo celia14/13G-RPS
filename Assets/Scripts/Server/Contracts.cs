@@ -97,9 +97,9 @@ namespace Contracts
 
     public static class MatchEventTypes
     {
-        // TODO rename these to be like events
-        public const string SelectCard = "SelectCard";
-        public const string ResolveRound = "ResolveRound";
+        public const string MatchStarted = "MatchStarted";
+        public const string CardSelected = "CardSelected";
+        public const string RoundResolved = "RoundResolved";
     }
 
     [Serializable]
