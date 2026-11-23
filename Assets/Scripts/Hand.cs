@@ -11,21 +11,13 @@ public class Hand : MonoBehaviour
 
     private Transform handTransform;
 
-    public void PopulateHand()
+    public void PopulateHand(CardDto[] hand)
     {
-        // Always populate one of each type
-        CardType[] types = (CardType[])System.Enum.GetValues(typeof(CardType));
-        
-        // Shuffle
-        for (int i = 0; i < types.Length; i++)
-        {
-            int randomIndex = Random.Range(i, types.Length);
-            (types[randomIndex], types[i]) = (types[i], types[randomIndex]);
-        }
+        ClearHand();
 
-        foreach (CardType type in types)
+        foreach (CardDto cardDto in hand)
         {
-            AddCard(type);
+            AddCard(cardDto.cardType);
         }
     }
 

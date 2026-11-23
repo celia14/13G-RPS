@@ -21,12 +21,10 @@ public class MatchManager : MonoBehaviour
         MatchState matchState = matchClient.InitMatch();
         matchClient.MatchEventReceived += HandleMatchEvent;
 
-        // TODO populate based on state
-        playerHand.PopulateHand();
-        opponentHand.PopulateHand();
-
-        SetPlayerScore(0);
-        SetOpponentScore(0);
+        foreach (var playerState in matchState.playerStates)
+        {
+            UpdatePlayerState(playerState);
+        }
 
         playerHand.CardClicked += OnCardClicked;
     }
@@ -35,16 +33,30 @@ public class MatchManager : MonoBehaviour
     {
         switch (matchEvent.eventType)
         {
-            case "CardSelected":
+            case MatchEventTypes.SelectCard:
                 var cardSelectedEvent = JsonUtility.FromJson<MatchEvent<SelectCardEventDetails>>(matchEventJson);
                 OnCardSelected(cardSelectedEvent);
                 break;
-            case "RoundResult":
+            case MatchEventTypes.ResolveRound:
                 // Handle round result event
                 break;
             default:
                 Debug.LogError("Unknown match event type: " + matchEvent.eventType);
                 break;
+        }
+    }
+
+    private void UpdatePlayerState(MatchPlayerState playerState)
+    {
+        if (playerState.playerId == playerId)
+        {
+            playerHand.PopulateHand(playerState.hand);
+            SetPlayerScore(playerState.score);
+        }
+        else
+        {
+            opponentHand.PopulateHand(playerState.hand);
+            SetOpponentScore(playerState.score);
         }
     }
 

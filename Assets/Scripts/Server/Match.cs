@@ -53,6 +53,9 @@ namespace Server
                 { player2Id, new MatchPlayerState { playerId = player2Id } }
             };
 
+            playerStates[player1Id].hand = GetStartingHand();
+            playerStates[player2Id].hand = GetStartingHand();
+
             // Start immediately on load/creation for now
             StartMatch();
         }
@@ -79,6 +82,28 @@ namespace Server
             Debug.Log($"SERVER: Starting match {matchId}");
             status = MatchStatus.Playing;
             // Start the opponent's turn
+        }
+
+        private CardDto[] GetStartingHand()
+        {
+            // Always populate one of each type
+            CardType[] types = (CardType[])Enum.GetValues(typeof(CardType));
+
+            // Shuffle
+            for (int i = 0; i < types.Length; i++)
+            {
+                int randomIndex = UnityEngine.Random.Range(i, types.Length);
+                (types[randomIndex], types[i]) = (types[i], types[randomIndex]);
+            }
+
+            // Starting hand of CardDtos
+            CardDto[] startingHand = new CardDto[types.Length];
+            foreach (var type in types)
+            {
+                startingHand[(int)type] = new CardDto { cardType = type };
+            }
+
+            return startingHand;
         }
 
         private void SelectCard(string playerId, CardDto selectedCard)
