@@ -8,24 +8,25 @@ public enum CardType
     Scissors
 }
 
-[RequireComponent(typeof(Image))]
 public class Card : MonoBehaviour
 {
     public CardType cardType;
     public bool isRevealed;
 
+    [SerializeField] private Image image;
     [SerializeField] private Sprite rockSprite;
     [SerializeField] private Sprite paperSprite;
     [SerializeField] private Sprite scissorsSprite;
     [SerializeField] private Sprite backSprite;
+    
+    private HandCardHandler handCardHandler;
 
-    private Image image;
-
-    public void Init(CardType type, bool faceUp)
+    public void Init(CardType type, bool faceUp, bool allowInteraction)
     {
         cardType = type;
         isRevealed = faceUp;
         SetSprite();
+        ToggleInteraction(allowInteraction);
     }
 
     public void Flip()
@@ -36,7 +37,7 @@ public class Card : MonoBehaviour
 
     private void Awake()
     {
-        image = GetComponent<Image>();
+        handCardHandler = GetComponent<HandCardHandler>();
         SetSprite();
     }
 
@@ -65,4 +66,8 @@ public class Card : MonoBehaviour
         return null;
     }
 
+    private void ToggleInteraction(bool allowInteraction)
+    {
+        handCardHandler.enabled = allowInteraction;
+    }
 }

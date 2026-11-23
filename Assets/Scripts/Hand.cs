@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Hand : MonoBehaviour
 {
-    public bool isRevealed;
+    public bool isPlayer;
 
     [SerializeField] private Card cardPrefab;
 
@@ -48,6 +48,6 @@ public class Hand : MonoBehaviour
     private void AddCard(CardType type)
     {
         Card card = Instantiate(cardPrefab, handTransform);
-        card.Init(type, isRevealed);
+        card.Init(type, isPlayer, isPlayer);
     }
 }

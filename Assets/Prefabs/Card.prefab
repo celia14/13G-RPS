@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8608701688878049939}
   - component: {fileID: 5974423018194682528}
-  - component: {fileID: 8944430089310201827}
   - component: {fileID: 6234685894662109691}
+  - component: {fileID: 2353158456785910722}
   m_Layer: 5
   m_Name: Card
   m_TagString: Untagged
@@ -30,7 +30,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 8918999379374979800}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -46,13 +47,92 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1441120512847751488}
   m_CullTransparentMesh: 1
---- !u!114 &8944430089310201827
+--- !u!114 &6234685894662109691
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1441120512847751488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b7f7889dab36674fa2634919cf31a32, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Card
+  cardType: 0
+  isRevealed: 0
+  image: {fileID: 4269416969845058647}
+  rockSprite: {fileID: 3452003437791708593, guid: e2aeb8cf5a8c803449387ed39d5e7f98, type: 3}
+  paperSprite: {fileID: 2045492094208909694, guid: 1222b880ae3f2d1428ba74ea5ebd520c, type: 3}
+  scissorsSprite: {fileID: 6689946350199266671, guid: c2c72ceb6fdc4e243a5210b3d7020451, type: 3}
+  backSprite: {fileID: -8622259438476403829, guid: 041c3e3f0c07f0a468739e3994377f50, type: 3}
+  handCardHandler: {fileID: 2353158456785910722}
+--- !u!114 &2353158456785910722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1441120512847751488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca8d53719cfd78e46922a18070302a18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HandCardHandler
+  cardImage: {fileID: 8918999379374979800}
+  hoverOffset: 20
+--- !u!1 &5761477516488719866
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8918999379374979800}
+  - component: {fileID: 6306467460287381466}
+  - component: {fileID: 4269416969845058647}
+  m_Layer: 5
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8918999379374979800
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5761477516488719866}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8608701688878049939}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &6306467460287381466
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5761477516488719866}
+  m_CullTransparentMesh: 1
+--- !u!114 &4269416969845058647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5761477516488719866}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
@@ -76,21 +156,3 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &6234685894662109691
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1441120512847751488}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b7f7889dab36674fa2634919cf31a32, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Card
-  cardType: 0
-  isRevealed: 0
-  rockSprite: {fileID: 3452003437791708593, guid: e2aeb8cf5a8c803449387ed39d5e7f98, type: 3}
-  paperSprite: {fileID: 2045492094208909694, guid: 1222b880ae3f2d1428ba74ea5ebd520c, type: 3}
-  scissorsSprite: {fileID: 6689946350199266671, guid: c2c72ceb6fdc4e243a5210b3d7020451, type: 3}
-  backSprite: {fileID: -8622259438476403829, guid: 041c3e3f0c07f0a468739e3994377f50, type: 3}
