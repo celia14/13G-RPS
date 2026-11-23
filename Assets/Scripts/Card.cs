@@ -12,7 +12,7 @@ public enum CardType
 public class Card : MonoBehaviour
 {
     public CardType cardType;
-    public bool isFaceUp;
+    public bool isRevealed;
 
     [SerializeField] private Sprite rockSprite;
     [SerializeField] private Sprite paperSprite;
@@ -24,17 +24,16 @@ public class Card : MonoBehaviour
     public void Init(CardType type, bool faceUp)
     {
         cardType = type;
-        isFaceUp = faceUp;
+        isRevealed = faceUp;
         SetSprite();
     }
 
     public void Flip()
     {
-        isFaceUp = !isFaceUp;
+        isRevealed = !isRevealed;
         SetSprite();
     }
 
-    // Awake is called during initialization, before Start
     private void Awake()
     {
         image = GetComponent<Image>();
@@ -48,7 +47,7 @@ public class Card : MonoBehaviour
 
     private Sprite GetSprite()
     {
-        if (!isFaceUp)
+        if (!isRevealed)
         {
             return backSprite;
         }
