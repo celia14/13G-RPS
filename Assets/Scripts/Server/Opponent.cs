@@ -39,12 +39,8 @@ namespace Server
 
             switch (matchEvent.eventType)
             {
-                case MatchEventTypes.MatchStarted:
-                    // Start playing!
+                case MatchEventTypes.RoundStarted:
                     await PlayRoundAsync();
-                    break;
-                case MatchEventTypes.RoundResolved:
-                    // Handle round result event
                     break;
                 default:
                     break;

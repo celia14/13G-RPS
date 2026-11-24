@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Contracts;
 using UnityEngine;
 
@@ -73,8 +74,9 @@ namespace Server
             }
 
             status = MatchStatus.Playing;
-
             EmitMatchEvent(MatchEventTypes.MatchStarted, new { });
+
+            StartRound();
         }
 
         /// <summary>
@@ -115,6 +117,30 @@ namespace Server
             return startingHand;
         }
 
+        private void StartRound()
+        {
+            if (status != MatchStatus.Playing)
+            {
+                throw new InvalidOperationException("Cannot start a round when the match is not in playing status.");
+            }
+
+            if (playerStates.Values.Any(p => p.hand == null || p.hand.Length == 0))
+            {
+                throw new InvalidOperationException("Cannot start a round when any player has an empty hand.");
+            }
+
+            round++; // First round is 1 - seems right to me if we wanted to display it
+
+            // Clear selected cards for all players
+            foreach (var player in playerStates.Values)
+            {
+                player.selectedCard = null;
+            }
+
+            // Notify round started
+            EmitMatchEvent(MatchEventTypes.RoundStarted, new { });
+        }
+
         private void SelectCard(string playerId, CardDto selectedCard)
         {
             if (selectedCard == null)
@@ -136,15 +162,69 @@ namespace Server
             playerStates[playerId].selectedCard = selectedCard;
             playerStates[playerId].hand = playerStates[playerId].hand?.Where(c => !AreCardsEqual(c, selectedCard)).ToArray();
 
-            // Broadcast the selection
+            // Broadcast the selection -> client will make a UI update
             EmitMatchEvent(
                 MatchEventTypes.CardSelected,
-                new SelectCardEventDetails
+                new CardSelectedEventDetails
                 {
                     playerId = playerId,
                     selectedCard = selectedCard
                 }
             );
+
+            // Playing a card may resolve the round if the opponent has already played theirs
+            CheckResolveRound();
+        }
+
+        private void CheckResolveRound()
+        {
+            if (playerStates.Values.All(p => p.selectedCard != null))
+            {
+                ResolveRound();
+            }
+        }
+
+        private void ResolveRound()
+        {
+            // Find the winner
+            var players = playerStates.Values.ToArray();
+            var result = ScoreRps(players[0].selectedCard, players[1].selectedCard);
+            var winner = result > 0 ? players[0] : result < 0 ? players[1] : null;
+
+            if (winner != null)
+            {
+                winner.score++;
+            }
+
+            // Notify all clients about the round result
+            EmitMatchEvent(
+                MatchEventTypes.RoundResolved,
+                new RoundResolvedEventDetails
+                {
+                    isDraw = result == 0,
+                    winningPlayerId = winner?.playerId,
+                    playedCards = players.Select(p => CloneCard(p.selectedCard)).ToArray(),
+                }
+            );
+
+            Debug.Log("Round resolved. Winner: " + (winner?.playerId ?? "Draw"));
+
+            // TODO end of match
+
+            // Then start the next round asynchronously
+            _ = StartRoundAsync();
+        }
+
+        /// <summary>
+        /// Starts the next round after a short delay for the results to sink in.
+        /// This should really be handled by the client based on its animations/ux/etc.
+        /// </summary>
+        private async Task StartRoundAsync()
+        {
+            await Task.Delay(3000);
+
+            Debug.Log("Starting next round...");
+            StartRound();
         }
 
         // Utils
@@ -167,13 +247,15 @@ namespace Server
         {
             if (state == null) return null;
 
-            return new MatchPlayerState()
+            var newState = new MatchPlayerState()
             {
                 playerId = state.playerId,
                 score = state.score,
                 hand = state.hand?.Select(CloneCard).ToArray(),
                 selectedCard = CloneCard(state.selectedCard),
             };
+
+            return newState;
         }
 
         private static CardDto CloneCard(CardDto card)
@@ -192,6 +274,20 @@ namespace Server
             if (card1 == null && card2 == null) return true;
             if (card1 == null || card2 == null) return false;
             return card1.cardType == card2.cardType;
+        }
+
+        private static int ScoreRps(CardDto card1, CardDto card2)
+        {
+            // Draw
+            if (AreCardsEqual(card1, card2)) return 0;
+
+            // Card1 wins
+            if (card1.cardType == CardType.Rock && card2.cardType == CardType.Scissors) return 1;
+            if (card1.cardType == CardType.Scissors && card2.cardType == CardType.Paper) return 1;
+            if (card1.cardType == CardType.Paper && card2.cardType == CardType.Rock) return 1;
+
+            // Card2 wins
+            return -1;
         }
     }
 

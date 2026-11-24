@@ -98,19 +98,20 @@ namespace Contracts
     public static class MatchEventTypes
     {
         public const string MatchStarted = "MatchStarted";
+        public const string RoundStarted = "RoundStarted";
         public const string CardSelected = "CardSelected";
         public const string RoundResolved = "RoundResolved";
     }
 
     [Serializable]
-    public class SelectCardEventDetails
+    public class CardSelectedEventDetails
     {
         public PlayerId playerId;
         public CardDto selectedCard;
     }
 
     [Serializable]
-    public class ResolveRoundEventDetails
+    public class RoundResolvedEventDetails
     {
         public bool isDraw;
         public PlayerId? winningPlayerId;

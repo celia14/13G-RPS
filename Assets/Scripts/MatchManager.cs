@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MatchManager : MonoBehaviour
 {
-    private const string playerId = "player1"; // TODO
+    private const string playerId = "player"; // TODO
 
     [SerializeField] private Hand playerHand;
     [SerializeField] private Hand opponentHand;
@@ -28,14 +28,20 @@ public class MatchManager : MonoBehaviour
         switch (matchEvent.eventType)
         {
             case MatchEventTypes.MatchStarted:
+                // Populate initial hand
+                UpdateMatchState(matchEvent.newMatchState);
+                break;
+            case MatchEventTypes.RoundStarted:
+                // Clears the play area
                 UpdateMatchState(matchEvent.newMatchState);
                 break;
             case MatchEventTypes.CardSelected:
-                var cardSelectedEvent = JsonUtility.FromJson<MatchEvent<SelectCardEventDetails>>(matchEventJson);
+                var cardSelectedEvent = JsonUtility.FromJson<MatchEvent<CardSelectedEventDetails>>(matchEventJson);
                 OnCardSelected(cardSelectedEvent);
                 break;
             case MatchEventTypes.RoundResolved:
-                // Handle round result event
+                var roundResolvedEvent = JsonUtility.FromJson<MatchEvent<RoundResolvedEventDetails>>(matchEventJson);
+                OnRoundResolved(roundResolvedEvent);
                 break;
             default:
                 break;
@@ -52,15 +58,26 @@ public class MatchManager : MonoBehaviour
 
     private void UpdatePlayerState(MatchPlayerState playerState)
     {
+        Debug.Log(JsonUtility.ToJson(playerState));
         if (playerState.playerId == playerId)
         {
             playerHand.PopulateHand(playerState.hand);
             SetPlayerScore(playerState.score);
+            if (playerState.selectedCard == null)
+            {
+                playArea.ClearPlayerSlot();
+            }
+            // Assumption: We won't depend on plain Update
+            // to move the card to the slot, that's only OnCardSelected...
         }
         else
         {
             opponentHand.PopulateHand(playerState.hand);
             SetOpponentScore(playerState.score);
+            if (playerState.selectedCard == null)
+            {
+                playArea.ClearOpponentSlot();
+            }
         }
     }
 
@@ -69,7 +86,7 @@ public class MatchManager : MonoBehaviour
         matchClient.SelectCard(card.cardType);
     }
 
-    private void OnCardSelected(MatchEvent<SelectCardEventDetails> matchEvent)
+    private void OnCardSelected(MatchEvent<CardSelectedEventDetails> matchEvent)
     {
         if (matchEvent.details.playerId == playerId)
         {
@@ -81,7 +98,15 @@ public class MatchManager : MonoBehaviour
             var card = opponentHand.GetCard(matchEvent.details.selectedCard.cardType);
             playArea.MoveCardToOpponentSlot(card);
         }
-    
+    }
+
+    private void OnRoundResolved(MatchEvent<RoundResolvedEventDetails> matchEvent)
+    {
+        // Here's where we could do some animations, etc.
+        playArea.RevealCards();
+
+        // But for now just update to to reflect the updated scores
+        UpdateMatchState(matchEvent.newMatchState);
     }
 
     private void SetPlayerScore(int score)
