@@ -1,9 +1,15 @@
+using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Contracts;
 using Newtonsoft.Json;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// Manages the player's experience of the match. Sends player interactions to the
+/// server as commands, and updates the UI based on match events.
+/// </summary>
 public class MatchManager : MonoBehaviour
 {
     private string playerId;
@@ -18,10 +24,12 @@ public class MatchManager : MonoBehaviour
     [SerializeField] private History history;
 
     private MatchClient matchClient;
+    private CancellationToken lifetimeToken;
 
     void Start()
     {
-        /*
+        lifetimeToken = destroyCancellationToken;
+
         if (GameManager.Instance.Session == null)
         {
             // Redirect the user to login if there's an issue with the session
@@ -29,8 +37,6 @@ public class MatchManager : MonoBehaviour
             return;
         }
         playerId = GameManager.Instance.Session.playerId;
-        */
-        playerId = "player";
 
         matchClient = new MatchClient(playerId);
         matchClient.MatchEventReceived += HandleMatchEvent;
@@ -39,34 +45,56 @@ public class MatchManager : MonoBehaviour
         playerHand.CardClicked += OnCardClicked;
     }
 
+    private void OnDestroy()
+    {
+        if (playerHand != null)
+        {
+            playerHand.CardClicked -= OnCardClicked;
+        }
+
+        if (matchClient != null)
+        {
+            matchClient.MatchEventReceived -= HandleMatchEvent;
+            matchClient.Dispose();
+        }
+    }
+
     private async void HandleMatchEvent(MatchEvent matchEvent, string matchEventJson)
     {
-        switch (matchEvent.eventType)
+        try
         {
-            case MatchEventTypes.MatchStarted:
-                // Populate initial hand
-                UpdateMatchState(matchEvent.newMatchState);
-                break;
-            case MatchEventTypes.RoundStarted:
-                OnRoundStarted(matchEvent);
-                break;
-            case MatchEventTypes.CardSelected:
-                var cardSelectedEvent = JsonConvert.DeserializeObject<MatchEvent<CardSelectedEventDetails>>(matchEventJson)
-                    ?? throw new JsonSerializationException("CardSelected event cannot be null.");
-                OnCardSelected(cardSelectedEvent);
-                break;
-            case MatchEventTypes.RoundResolved:
-                var roundResolvedEvent = JsonConvert.DeserializeObject<MatchEvent<RoundResolvedEventDetails>>(matchEventJson)
-                    ?? throw new JsonSerializationException("RoundResolved event cannot be null.");
-                await OnRoundResolvedAsync(roundResolvedEvent);
-                break;
-            case MatchEventTypes.MatchEnded:
-                var matchEndedEvent = JsonConvert.DeserializeObject<MatchEvent<MatchEndedEventDetails>>(matchEventJson)
-                    ?? throw new JsonSerializationException("MatchEnded event cannot be null.");
-                OnMatchEnded(matchEndedEvent);
-                break;
-            default:
-                break;
+            switch (matchEvent.eventType)
+            {
+                case MatchEventTypes.MatchStarted:
+                    // Populate initial hand
+                    UpdateMatchState(matchEvent.newMatchState);
+                    break;
+                case MatchEventTypes.RoundStarted:
+                    OnRoundStarted(matchEvent);
+                    break;
+                case MatchEventTypes.CardSelected:
+                    var cardSelectedEvent = JsonConvert.DeserializeObject<MatchEvent<CardSelectedEventDetails>>(matchEventJson)
+                        ?? throw new JsonSerializationException("CardSelected event cannot be null.");
+                    OnCardSelected(cardSelectedEvent);
+                    break;
+                case MatchEventTypes.RoundResolved:
+                    var roundResolvedEvent = JsonConvert.DeserializeObject<MatchEvent<RoundResolvedEventDetails>>(matchEventJson)
+                        ?? throw new JsonSerializationException("RoundResolved event cannot be null.");
+                    await OnRoundResolvedAsync(roundResolvedEvent);
+                    break;
+                case MatchEventTypes.MatchEnded:
+                    var matchEndedEvent = JsonConvert.DeserializeObject<MatchEvent<MatchEndedEventDetails>>(matchEventJson)
+                        ?? throw new JsonSerializationException("MatchEnded event cannot be null.");
+                    OnMatchEnded(matchEndedEvent);
+                    await LeaveMatchAsync();
+                    break;
+                default:
+                    break;
+            }
+        }
+        catch (OperationCanceledException) when (lifetimeToken.IsCancellationRequested)
+        {
+            // Scene destruction cancels pending UI updates and navigation.
         }
     }
 
@@ -78,6 +106,14 @@ public class MatchManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ensure the UI reflects the state.
+    /// </summary>
+    /// <remarks>
+    /// This doesn't touch the selected card because that's handled by specific events.
+    /// That means this can't be used to recover if the selected card gets out of
+    /// sync with the server, so it's a gap.
+    /// </remarks>
     private void UpdatePlayerState(MatchPlayerState playerState)
     {
         if (playerState.playerId == playerId)
@@ -101,7 +137,7 @@ public class MatchManager : MonoBehaviour
     {
         // Move any existing cards to the history
         // Note, doing the history hackily since I just want it to exist.
-        // Really we need to keep better track than just moving the card objects.
+        // Really we need to keep better track of the history state than just moving the card objects.
         if (playArea.PlayerCard != null && playArea.OpponentCard != null)
         {
             history.MoveToHistory(playArea.PlayerCard, playArea.OpponentCard);
@@ -134,14 +170,15 @@ public class MatchManager : MonoBehaviour
     private async Task OnRoundResolvedAsync(MatchEvent<RoundResolvedEventDetails> matchEvent)
     {
         // Here's where we could do some animations, etc.
-        await Task.Delay(1000);
+        await Task.Delay(1000, lifetimeToken);
+        lifetimeToken.ThrowIfCancellationRequested();
         playArea.RevealCards();
 
         // But for now just update to to reflect the updated scores
         UpdateMatchState(matchEvent.newMatchState);
     }
 
-    private async void OnMatchEnded(MatchEvent<MatchEndedEventDetails> matchEvent)
+    private void OnMatchEnded(MatchEvent<MatchEndedEventDetails> matchEvent)
     {
         ClearPlayArea();
 
@@ -160,13 +197,12 @@ public class MatchManager : MonoBehaviour
         {
             opponentWinnerText.gameObject.SetActive(true);
         }
-
-        _ = LeaveMatchAsync();
     }
 
     private async Task LeaveMatchAsync()
     {
-        await Task.Delay(3000);
+        await Task.Delay(3000, lifetimeToken);
+        lifetimeToken.ThrowIfCancellationRequested();
         GameManager.Instance.ShowTitleScreen();
     }
 

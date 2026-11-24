@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Contracts;
 using Newtonsoft.Json;
@@ -9,9 +10,11 @@ using UnityEngine;
 namespace Server
 {
     /// <summary>
-    /// Manages a single 3-round match between two players.
+    /// Manages a single 3-round match between two players. Doesn't know if that's humans or bots.
+    /// It receives commands from the players, updates its state, manages the match flow, and publishes
+    /// events to inform the players/clients of the match progress.
     /// </summary>
-    public class Match
+    public class Match : IDisposable
     {
         private const int TotalRounds = 3;
 
@@ -20,6 +23,8 @@ namespace Server
         private MatchStatus status = MatchStatus.New;
         private int round = 0;
         private readonly Dictionary<string, MatchPlayerState> playerStates = new();
+        private readonly CancellationTokenSource lifetime = new();
+        private bool disposed;
 
         public string MatchId => matchId;
 
@@ -40,6 +45,11 @@ namespace Server
         /// </summary>
         public event Action<string> EventPublished;
 
+        /// <summary>
+        /// Notifies the match handler after the final result has been published and callbacks released.
+        /// </summary>
+        public event Action<Match> Completed;
+
         public Match()
         {
             matchId = Guid.NewGuid().ToString();
@@ -47,6 +57,8 @@ namespace Server
 
         public void AddPlayer(string playerId, Action<string> playerEventCallback)
         {
+            ThrowIfDisposed();
+
             if (playerStates.Count >= 2)
             {
                 throw new InvalidOperationException("Match already has two players");
@@ -65,6 +77,8 @@ namespace Server
 
         public void StartMatch()
         {
+            ThrowIfDisposed();
+
             if (playerStates.Count < 2)
             {
                 throw new ArgumentException("Two players must have joined");
@@ -79,7 +93,10 @@ namespace Server
             status = MatchStatus.Playing;
             EmitMatchEvent(MatchEventTypes.MatchStarted, new { });
 
-            StartRound();
+            if (!disposed)
+            {
+                StartRound();
+            }
         }
 
         /// <summary>
@@ -87,6 +104,12 @@ namespace Server
         /// </summary>
         public void ProcessCommand(PlayerCommand command, string commandJson)
         {
+            ThrowIfDisposed();
+            if (status != MatchStatus.Playing)
+            {
+                throw new InvalidOperationException("Cannot process commands when the match is not playing.");
+            }
+
             switch (command.commandType)
             {
                 case "SelectCard":
@@ -211,26 +234,43 @@ namespace Server
                 }
             );
 
+            if (disposed)
+            {
+                return;
+            }
+
             if (round >= TotalRounds)
             {
                 // If we've reached the round limit, end the match
-                _ = StartStepAsync(() => EndMatch());
+                StartStepAsync(() => EndMatch());
             }
             else
             {
                 // Else start the next round asynchronously
-                _ = StartStepAsync(() => StartRound());
+                StartStepAsync(() => StartRound());
             }
         }
 
         /// <summary>
-        /// Starts the next step after a short delay for the results to sink in.
-        /// This should be handled by the client based on its animations/ux/etc.!
+        /// Starts the next step after a short delay for the player to see the results.
         /// </summary>
-        private async Task StartStepAsync(Action callback)
+        /// <remarks>
+        /// This is wrong, the client should be in charge of any delays or animation!
+        /// Just put it here as a hack to improve the experience, revisiting UI update timing is a todo.
+        /// </remarks>
+        private async void StartStepAsync(Action callback)
         {
-            await Task.Delay(3000);
-            callback();
+            var token = lifetime.Token;
+            try
+            {
+                await Task.Delay(3000, token);
+                token.ThrowIfCancellationRequested();
+                callback();
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                // Teardown cancels scheduled steps; other errors reach Unity's synchronization context.
+            }
         }
 
         private void EndMatch()
@@ -241,17 +281,45 @@ namespace Server
             var winner = playerStates.Values.OrderByDescending(p => p.score).FirstOrDefault();
             var isDraw = playerStates.Values.Count(p => p.score == winner.score) > 1;
             
-            // Emit the match ended event
-            EmitMatchEvent(
-                MatchEventTypes.MatchEnded,
-                new MatchEndedEventDetails
-                {
-                    isDraw = isDraw,
-                    winningPlayerId = isDraw ? null : winner?.playerId
-                }
-            );
+            try
+            {
+                EmitMatchEvent(
+                    MatchEventTypes.MatchEnded,
+                    new MatchEndedEventDetails
+                    {
+                        isDraw = isDraw,
+                        winningPlayerId = isDraw ? null : winner?.playerId
+                    }
+                );
+            }
+            finally
+            {
+                var completed = Completed;
+                Dispose();
+                completed?.Invoke(this);
+            }
+        }
 
-            // TODO: Clean up by destroying the match.
+        public void Dispose()
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+            lifetime.Cancel();
+            lifetime.Dispose();
+            EventPublished = null;
+            Completed = null;
+        }
+
+        private void ThrowIfDisposed()
+        {
+            if (disposed)
+            {
+                throw new ObjectDisposedException(nameof(Match));
+            }
         }
 
         // Utils
