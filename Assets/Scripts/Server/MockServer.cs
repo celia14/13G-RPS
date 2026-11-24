@@ -22,6 +22,22 @@ namespace Server
         private readonly Dictionary<string, Match> matches = new();
 
         /// <summary>
+        /// Stub for login. Returns session details - currently just the username.
+        /// </summary>
+        public string Login(string username, string password)
+        {
+            bool isAuthenticated = MockAuthenticator.Instance.Authenticate(username, password);
+            if (isAuthenticated)
+            {
+                return username;
+            }
+            else
+            {
+                throw new UnauthorizedAccessException("Invalid username or password.");
+            }
+        }
+
+        /// <summary>
         /// Creates a new match and adds the player to it.
         /// The client provides a callback to receive match events for their specific match.
         /// This one is awkward and is making a lot of assumptions for a single player vs bot scenario.
