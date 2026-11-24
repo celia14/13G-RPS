@@ -40,7 +40,7 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
     }
 
-    public void ShowTitle()
+    public void ShowTitleScreen()
     {
         SceneManager.LoadScene("LoginScene", LoadSceneMode.Single);
     }

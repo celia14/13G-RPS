@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Contracts;
 using Newtonsoft.Json;
 using TMPro;
@@ -11,6 +12,8 @@ public class MatchManager : MonoBehaviour
     [SerializeField] private Hand opponentHand;
     [SerializeField] private TMP_Text playerScoreText;
     [SerializeField] private TMP_Text opponentScoreText;
+    [SerializeField] private TMP_Text playerWinnerText;
+    [SerializeField] private TMP_Text opponentWinnerText;
     [SerializeField] private PlayArea playArea;
     [SerializeField] private History history;
 
@@ -18,13 +21,16 @@ public class MatchManager : MonoBehaviour
 
     void Start()
     {
+        /*
         if (GameManager.Instance.Session == null)
         {
-            // Redirect the user to login
-            GameManager.Instance.ShowTitle();
+            // Redirect the user to login if there's an issue with the session
+            GameManager.Instance.ShowTitleScreen();
             return;
         }
         playerId = GameManager.Instance.Session.playerId;
+        */
+        playerId = "player";
 
         matchClient = new MatchClient(playerId);
         matchClient.MatchEventReceived += HandleMatchEvent;
@@ -33,7 +39,7 @@ public class MatchManager : MonoBehaviour
         playerHand.CardClicked += OnCardClicked;
     }
 
-    private void HandleMatchEvent(MatchEvent matchEvent, string matchEventJson)
+    private async void HandleMatchEvent(MatchEvent matchEvent, string matchEventJson)
     {
         switch (matchEvent.eventType)
         {
@@ -52,7 +58,12 @@ public class MatchManager : MonoBehaviour
             case MatchEventTypes.RoundResolved:
                 var roundResolvedEvent = JsonConvert.DeserializeObject<MatchEvent<RoundResolvedEventDetails>>(matchEventJson)
                     ?? throw new JsonSerializationException("RoundResolved event cannot be null.");
-                OnRoundResolved(roundResolvedEvent);
+                await OnRoundResolvedAsync(roundResolvedEvent);
+                break;
+            case MatchEventTypes.MatchEnded:
+                var matchEndedEvent = JsonConvert.DeserializeObject<MatchEvent<MatchEndedEventDetails>>(matchEventJson)
+                    ?? throw new JsonSerializationException("MatchEnded event cannot be null.");
+                OnMatchEnded(matchEndedEvent);
                 break;
             default:
                 break;
@@ -69,30 +80,24 @@ public class MatchManager : MonoBehaviour
 
     private void UpdatePlayerState(MatchPlayerState playerState)
     {
-        Debug.Log(JsonConvert.SerializeObject(playerState));
         if (playerState.playerId == playerId)
         {
             playerHand.PopulateHand(playerState.hand);
             SetPlayerScore(playerState.score);
-            if (playerState.selectedCard == null)
-            {
-                playArea.ClearPlayerSlot();
-            }
-            // Assumption: We won't depend on plain Update
-            // to move the card to the slot, that's only OnCardSelected...
         }
         else
         {
             opponentHand.PopulateHand(playerState.hand);
             SetOpponentScore(playerState.score);
-            if (playerState.selectedCard == null)
-            {
-                playArea.ClearOpponentSlot();
-            }
         }
     }
 
     private void OnRoundStarted(MatchEvent matchEvent)
+    {
+        ClearPlayArea();
+    }
+
+    private void ClearPlayArea()
     {
         // Move any existing cards to the history
         // Note, doing the history hackily since I just want it to exist.
@@ -126,13 +131,43 @@ public class MatchManager : MonoBehaviour
         }
     }
 
-    private void OnRoundResolved(MatchEvent<RoundResolvedEventDetails> matchEvent)
+    private async Task OnRoundResolvedAsync(MatchEvent<RoundResolvedEventDetails> matchEvent)
     {
         // Here's where we could do some animations, etc.
+        await Task.Delay(1000);
         playArea.RevealCards();
 
         // But for now just update to to reflect the updated scores
         UpdateMatchState(matchEvent.newMatchState);
+    }
+
+    private async void OnMatchEnded(MatchEvent<MatchEndedEventDetails> matchEvent)
+    {
+        ClearPlayArea();
+
+        if (matchEvent.details.isDraw)
+        {
+            playerWinnerText.text = "Draw!";
+            opponentWinnerText.text = "Draw!";
+            playerWinnerText.gameObject.SetActive(true);
+            opponentWinnerText.gameObject.SetActive(true);
+        }
+        else if (matchEvent.details.winningPlayerId == playerId)
+        {
+            playerWinnerText.gameObject.SetActive(true);
+        }
+        else
+        {
+            opponentWinnerText.gameObject.SetActive(true);
+        }
+
+        _ = LeaveMatchAsync();
+    }
+
+    private async Task LeaveMatchAsync()
+    {
+        await Task.Delay(3000);
+        GameManager.Instance.ShowTitleScreen();
     }
 
     private void SetPlayerScore(int score)

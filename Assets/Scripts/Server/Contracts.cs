@@ -11,7 +11,7 @@ namespace Contracts
     {
         public PlayerId playerId;
     }
-    
+
     public enum CardType
     {
         Rock = 0,
@@ -107,6 +107,7 @@ namespace Contracts
         public const string RoundStarted = "RoundStarted";
         public const string CardSelected = "CardSelected";
         public const string RoundResolved = "RoundResolved";
+        public const string MatchEnded = "MatchEnded";
     }
 
     [Serializable]
@@ -122,5 +123,12 @@ namespace Contracts
         public bool isDraw;
         public PlayerId? winningPlayerId;
         public CardDto[] playedCards;
+    }
+
+    [Serializable]
+    public class MatchEndedEventDetails
+    {
+        public bool isDraw;
+        public PlayerId? winningPlayerId;
     }
 }

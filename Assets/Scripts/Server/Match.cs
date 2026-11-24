@@ -13,6 +13,8 @@ namespace Server
     /// </summary>
     public class Match
     {
+        private const int TotalRounds = 3;
+
         private readonly string matchId;
 
         private MatchStatus status = MatchStatus.New;
@@ -209,24 +211,47 @@ namespace Server
                 }
             );
 
-            Debug.Log("Round resolved. Winner: " + (winner?.playerId ?? "Draw"));
-
-            // TODO end of match
-
-            // Then start the next round asynchronously
-            _ = StartRoundAsync();
+            if (round >= TotalRounds)
+            {
+                // If we've reached the round limit, end the match
+                _ = StartStepAsync(() => EndMatch());
+            }
+            else
+            {
+                // Else start the next round asynchronously
+                _ = StartStepAsync(() => StartRound());
+            }
         }
 
         /// <summary>
-        /// Starts the next round after a short delay for the results to sink in.
-        /// This should really be handled by the client based on its animations/ux/etc.
+        /// Starts the next step after a short delay for the results to sink in.
+        /// This should be handled by the client based on its animations/ux/etc.!
         /// </summary>
-        private async Task StartRoundAsync()
+        private async Task StartStepAsync(Action callback)
         {
             await Task.Delay(3000);
+            callback();
+        }
 
-            Debug.Log("Starting next round...");
-            StartRound();
+        private void EndMatch()
+        {
+            status = MatchStatus.Complete;
+
+            // Calculate the final result
+            var winner = playerStates.Values.OrderByDescending(p => p.score).FirstOrDefault();
+            var isDraw = playerStates.Values.Count(p => p.score == winner.score) > 1;
+            
+            // Emit the match ended event
+            EmitMatchEvent(
+                MatchEventTypes.MatchEnded,
+                new MatchEndedEventDetails
+                {
+                    isDraw = isDraw,
+                    winningPlayerId = isDraw ? null : winner?.playerId
+                }
+            );
+
+            // TODO: Clean up by destroying the match.
         }
 
         // Utils
