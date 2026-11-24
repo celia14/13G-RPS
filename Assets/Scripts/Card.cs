@@ -2,9 +2,17 @@ using Contracts;
 using UnityEngine;
 using UnityEngine.UI;
 
-// The player can interact with the card differently depending on its
-// current situation, so we need to track that. Behavior is enabled and
-// disabled by toggling Handler scripts.
+/// <summary>
+/// What type of interactions the player can have with the
+/// in its current situation.
+/// </summary>
+/// <remarks>
+/// This was my way of adding some small interactions in the hand
+/// vs in the Play Area. The mode is used to toggle on and off
+/// Handler scripts, which define the behavior for each interaction mode.
+/// 
+/// No clue if this was a good approach or not!
+/// </remarks>
 public enum CardInteractionMode
 {
     None,

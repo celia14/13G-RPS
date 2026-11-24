@@ -21,10 +21,10 @@ public class PlayedCardHandler : MonoBehaviour, IPointerEnterHandler, IPointerEx
         cardImageTransform = card.Image.transform;
     }
 
-    // Hover: peek at the card
+    // Hover lets you peek at the card
     // This is buggy/fragile on changing interaction modes... I don't think
-    // the peek should be handled by changing the card image itself, so there's
-    // always a real source of truth. (But out of scope, it was just a fun idea.)
+    // the peek should be handled by changing the card image itself, but some other display
+    // tweak that leaves the source of truth unchanged. (But out of scope, it was just a fun idea.)
     public void OnPointerEnter(PointerEventData eventData)
     {
         cardImageTransform.localPosition = imagePosition + Vector3.up * hoverOffset;

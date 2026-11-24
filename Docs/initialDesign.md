@@ -3,7 +3,7 @@ This is my overall design before getting into the details of setting it up in Un
 # Gameplay
 
 ## Terms
-- throw = each player plays a card which go head to head
+- round = each player plays a card which go head to head
 - match = the 3-play showdown
 
 ## State
@@ -14,14 +14,14 @@ PlayerId: string;
 RpsMatchState: {
     playerIds: PlayerId[];
     playerStateById: Record<PlayerId, RpsMatchPlayerState>;
-    throwNumber: int;
+    roundNumber: int;
     status: 'playing' | 'complete';
 }
 
 RpsMatchPlayerState: {
     score: int;
     hand: Card[]; // selected card removed
-    selected: Card | undefined; // the card to throw
+    selected: Card | undefined; // the card to play
 }
 
 CardType: 'rock' | 'paper' | 'scissors';
@@ -63,11 +63,11 @@ From the client's point of view it's like: state A -> receive event containing E
 3. Player clicks a card to play -> send to server, which updates the playing card in the state -> server emits SelectCard event -> client renders the selected card
    - Thinking the click triggers a "selecting" visual state but we wait for the server confirmation to show "selected"
 4. On the server, opponent selects a card (for the simulated opponent, this is at random and with a random delay for realism) -> SelectCard event -> client renders the opponent's selection
-5. Once both cards are selected, resolve the throw
-   - I think the server should (immediately) emit a ResolveThrow event after both players have selected a card.
+5. Once both cards are selected, resolve the round
+   - I think the server should (immediately) emit a ResolveRound event after both players have selected a card.
    - This events tells us the new state, who won, plus each selected card. That way if there's an issue with the previous selection events we can just catch up.
 6. Client animates the selected cards and resolution and updates the score.
-7. Client moves on to the next throw, or declares the winner. Server kicks off the simulated opponent's next throw, or wraps up the match.
+7. Client moves on to the next round, or declares the winner. Server kicks off the simulated opponent's next round, or wraps up the match.
 
 ### Events
 ```
@@ -81,10 +81,10 @@ SelectCardEvent extends Event: {
     selectedCard: Card;
 }
 
-ResolveThrowEvent extends Event: {
+ResolveRoundEvent extends Event: {
     outcome: 'win' | 'draw';
     winnerId?: PlayerId; // undefined if draw
-    thrownCardByPlayerId: Record<PlayerId, Card>; // In case we need to recreate the throw animation
+    selectedCardByPlayerId: Record<PlayerId, Card>; // In case we need to recreate the animation??
 }
 
 ```
