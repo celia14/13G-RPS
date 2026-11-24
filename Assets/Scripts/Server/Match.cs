@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Contracts;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Server
@@ -87,7 +88,8 @@ namespace Server
             switch (command.commandType)
             {
                 case "SelectCard":
-                    var selectCardCommand = JsonUtility.FromJson<PlayerCommand<SelectCardCommandDetails>>(commandJson);
+                    var selectCardCommand = JsonConvert.DeserializeObject<PlayerCommand<SelectCardCommandDetails>>(commandJson)
+                        ?? throw new JsonSerializationException("SelectCard command cannot be null.");
                     SelectCard(selectCardCommand.playerId, selectCardCommand.details.selectedCard);
                     break;
                 default:
@@ -238,7 +240,7 @@ namespace Server
                 details = details,
                 newMatchState = State
             };
-            var eventJson = JsonUtility.ToJson(matchEvent);
+            var eventJson = JsonConvert.SerializeObject(matchEvent);
             Debug.Log($"SERVER: Sending event {eventJson}");
             EventPublished?.Invoke(eventJson);
         }

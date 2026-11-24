@@ -1,4 +1,5 @@
 using Contracts;
+using Newtonsoft.Json;
 using TMPro;
 using UnityEngine;
 
@@ -36,11 +37,13 @@ public class MatchManager : MonoBehaviour
                 UpdateMatchState(matchEvent.newMatchState);
                 break;
             case MatchEventTypes.CardSelected:
-                var cardSelectedEvent = JsonUtility.FromJson<MatchEvent<CardSelectedEventDetails>>(matchEventJson);
+                var cardSelectedEvent = JsonConvert.DeserializeObject<MatchEvent<CardSelectedEventDetails>>(matchEventJson)
+                    ?? throw new JsonSerializationException("CardSelected event cannot be null.");
                 OnCardSelected(cardSelectedEvent);
                 break;
             case MatchEventTypes.RoundResolved:
-                var roundResolvedEvent = JsonUtility.FromJson<MatchEvent<RoundResolvedEventDetails>>(matchEventJson);
+                var roundResolvedEvent = JsonConvert.DeserializeObject<MatchEvent<RoundResolvedEventDetails>>(matchEventJson)
+                    ?? throw new JsonSerializationException("RoundResolved event cannot be null.");
                 OnRoundResolved(roundResolvedEvent);
                 break;
             default:
@@ -58,7 +61,7 @@ public class MatchManager : MonoBehaviour
 
     private void UpdatePlayerState(MatchPlayerState playerState)
     {
-        Debug.Log(JsonUtility.ToJson(playerState));
+        Debug.Log(JsonConvert.SerializeObject(playerState));
         if (playerState.playerId == playerId)
         {
             playerHand.PopulateHand(playerState.hand);

@@ -1,5 +1,6 @@
 using System;
 using Contracts;
+using Newtonsoft.Json;
 using UnityEngine;
 
 public class MatchClient
@@ -46,7 +47,7 @@ public class MatchClient
             commandType = commandType,
             details = details
         };
-        var commandJson = JsonUtility.ToJson(command);
+        var commandJson = JsonConvert.SerializeObject(command);
         Debug.Log($"{playerId.ToUpper()} CLIENT: Sending command {commandJson}");
         server.PlayerCommand(commandJson);
     }
@@ -55,7 +56,8 @@ public class MatchClient
     {
         try {
             Debug.Log($"{playerId.ToUpper()} CLIENT: Received event {matchEventJson}");
-            var matchEvent = JsonUtility.FromJson<MatchEvent>(matchEventJson);
+            var matchEvent = JsonConvert.DeserializeObject<MatchEvent>(matchEventJson)
+                ?? throw new JsonSerializationException("Match event cannot be null.");
             MatchEventReceived?.Invoke(matchEvent, matchEventJson);
         }
         catch (Exception ex)

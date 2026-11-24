@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Contracts;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Server
@@ -70,7 +71,8 @@ namespace Server
             PlayerCommand command;
             try
             {
-                command = JsonUtility.FromJson<PlayerCommand>(commandJson);
+                command = JsonConvert.DeserializeObject<PlayerCommand>(commandJson)
+                    ?? throw new JsonSerializationException("Player command cannot be null.");
             }
             catch (Exception ex)
             {
