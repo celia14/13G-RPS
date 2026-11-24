@@ -5,6 +5,9 @@ public class PlayArea : MonoBehaviour
     [SerializeField] private Transform playerSlot;
     [SerializeField] private Transform opponentSlot;
 
+    public Card PlayerCard => GetCard(playerSlot);
+    public Card OpponentCard => GetCard(opponentSlot);
+
     public void MoveCardToPlayerSlot(Card card)
     {
         MoveCardToSlot(card, playerSlot, true);
@@ -57,9 +60,18 @@ public class PlayArea : MonoBehaviour
     {
         if (slot.childCount > 0)
         {
-            var card = slot.GetChild(0).GetComponent<Card>();
+            var card = GetCard(slot);
             card.SetInteractionMode(CardInteractionMode.None);
             card.Flip(true);
         }
+    }
+
+    private Card GetCard(Transform slot)
+    {
+        if (slot.childCount > 0)
+        {
+            return slot.GetChild(0).GetComponent<Card>();
+        }
+        return null;
     }
 }

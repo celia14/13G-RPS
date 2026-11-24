@@ -12,6 +12,7 @@ public class MatchManager : MonoBehaviour
     [SerializeField] private TMP_Text playerScoreText;
     [SerializeField] private TMP_Text opponentScoreText;
     [SerializeField] private PlayArea playArea;
+    [SerializeField] private History history;
 
     private MatchClient matchClient;
 
@@ -33,8 +34,7 @@ public class MatchManager : MonoBehaviour
                 UpdateMatchState(matchEvent.newMatchState);
                 break;
             case MatchEventTypes.RoundStarted:
-                // Clears the play area
-                UpdateMatchState(matchEvent.newMatchState);
+                OnRoundStarted(matchEvent);
                 break;
             case MatchEventTypes.CardSelected:
                 var cardSelectedEvent = JsonConvert.DeserializeObject<MatchEvent<CardSelectedEventDetails>>(matchEventJson)
@@ -82,6 +82,21 @@ public class MatchManager : MonoBehaviour
                 playArea.ClearOpponentSlot();
             }
         }
+    }
+
+    private void OnRoundStarted(MatchEvent matchEvent)
+    {
+        // Move any existing cards to the history
+        // Note, doing the history hackily since I just want it to exist.
+        // Really we need to keep better track than just moving the card objects.
+        if (playArea.PlayerCard != null && playArea.OpponentCard != null)
+        {
+            history.MoveToHistory(playArea.PlayerCard, playArea.OpponentCard);
+        }
+
+        // Just in case, clear the play area
+        playArea.ClearPlayerSlot();
+        playArea.ClearOpponentSlot();
     }
 
     private void OnCardClicked(Card card)
