@@ -154,19 +154,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3093194318849241336, guid: 91c8a0ecad6a1be4782f757c502262d6, type: 3}
       propertyPath: m_Color.a
-      value: 0.78431374
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3093194318849241336, guid: 91c8a0ecad6a1be4782f757c502262d6, type: 3}
       propertyPath: m_Color.b
-      value: 0.19607843
+      value: 0.36862746
       objectReference: {fileID: 0}
     - target: {fileID: 3093194318849241336, guid: 91c8a0ecad6a1be4782f757c502262d6, type: 3}
       propertyPath: m_Color.g
-      value: 0.12156863
+      value: 0.26666668
       objectReference: {fileID: 0}
     - target: {fileID: 3093194318849241336, guid: 91c8a0ecad6a1be4782f757c502262d6, type: 3}
       propertyPath: m_Color.r
-      value: 0.41568628
+      value: 0.4039216
       objectReference: {fileID: 0}
     - target: {fileID: 3413131983006149117, guid: 91c8a0ecad6a1be4782f757c502262d6, type: 3}
       propertyPath: m_Name
@@ -272,19 +272,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3093194318849241336, guid: 91c8a0ecad6a1be4782f757c502262d6, type: 3}
       propertyPath: m_Color.a
-      value: 0.78431374
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3093194318849241336, guid: 91c8a0ecad6a1be4782f757c502262d6, type: 3}
       propertyPath: m_Color.b
-      value: 0.41568628
+      value: 0.48235297
       objectReference: {fileID: 0}
     - target: {fileID: 3093194318849241336, guid: 91c8a0ecad6a1be4782f757c502262d6, type: 3}
       propertyPath: m_Color.g
-      value: 0.12156863
+      value: 0.26666668
       objectReference: {fileID: 0}
     - target: {fileID: 3093194318849241336, guid: 91c8a0ecad6a1be4782f757c502262d6, type: 3}
       propertyPath: m_Color.r
-      value: 0.3372549
+      value: 0.34117648
       objectReference: {fileID: 0}
     - target: {fileID: 3413131983006149117, guid: 91c8a0ecad6a1be4782f757c502262d6, type: 3}
       propertyPath: m_Name

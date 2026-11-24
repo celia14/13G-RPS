@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class MatchManager : MonoBehaviour
 {
-    private const string playerId = "player"; // TODO
+    private string playerId;
 
     [SerializeField] private Hand playerHand;
     [SerializeField] private Hand opponentHand;
@@ -18,6 +18,14 @@ public class MatchManager : MonoBehaviour
 
     void Start()
     {
+        if (GameManager.Instance.Session == null)
+        {
+            // Redirect the user to login
+            GameManager.Instance.ShowTitle();
+            return;
+        }
+        playerId = GameManager.Instance.Session.playerId;
+
         matchClient = new MatchClient(playerId);
         matchClient.MatchEventReceived += HandleMatchEvent;
         matchClient.CreateAndJoinMatch();

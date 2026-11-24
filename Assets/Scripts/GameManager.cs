@@ -1,3 +1,4 @@
+using Contracts;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -5,6 +6,9 @@ public class GameManager : MonoBehaviour
 {
     // Singleton
     public static GameManager Instance { get; private set; }
+
+    private UserSession session;
+    public UserSession Session => session;
 
     private void Awake() 
     {
@@ -23,7 +27,15 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public void StartGame()
+    public void HandleLogin(UserSession userSession)
+    {
+        session = userSession;
+
+        // Proceed to a match
+        StartMatch();
+    }
+
+    public void StartMatch()
     {
         SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
     }

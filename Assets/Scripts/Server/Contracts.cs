@@ -6,6 +6,12 @@ using MatchId = System.String;
 
 namespace Contracts
 {
+    [Serializable]
+    public class UserSession
+    {
+        public PlayerId playerId;
+    }
+    
     public enum CardType
     {
         Rock = 0,

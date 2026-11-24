@@ -22,14 +22,14 @@ namespace Server
         private readonly Dictionary<string, Match> matches = new();
 
         /// <summary>
-        /// Stub for login. Returns session details - currently just the username.
+        /// Stub for login. Returns session details (currently just the username).
         /// </summary>
-        public string Login(string username, string password)
+        public UserSession Login(string username, string password)
         {
             bool isAuthenticated = MockAuthenticator.Instance.Authenticate(username, password);
             if (isAuthenticated)
             {
-                return username;
+                return new UserSession { playerId = username };
             }
             else
             {
